@@ -1,2 +1,2 @@
-# freedom-qemu-softmmu
-QEMU SoftMMU for SiFive's Freedom Platform
+# freedom-qemu-system
+QEMU System for SiFive's Freedom Platform
