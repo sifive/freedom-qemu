@@ -1,2 +1,2 @@
 # freedom-qemu-system
-QEMU System for SiFive's Freedom Platform
+QEMU System Emulation for SiFive's Freedom Platform
