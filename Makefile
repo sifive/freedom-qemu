@@ -39,18 +39,18 @@ $(REDHAT)-deps-vars          := CFLAGS="-fPIC"
 # Targets $(PACKAGE_HEADING)/install.stamp and $(PACKAGE_HEADING)/libs.stamp
 include scripts/Package.mk
 
-$(OBJDIR)/%/build/$(SRCNAME_QEMU)/install.stamp: \
+$(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp
 	mkdir -p $(dir $@)
 	date > $@
 
 # We might need some extra target libraries for this package
-$(OBJ_NATIVE)/build/$(SRCNAME_QEMU)/libs.stamp: \
-		$(OBJ_NATIVE)/build/$(SRCNAME_QEMU)/install.stamp
+$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/libs.stamp: \
+		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
 	date > $@
 
-$(OBJ_WIN64)/build/$(SRCNAME_QEMU)/libs.stamp: \
-		$(OBJ_WIN64)/build/$(SRCNAME_QEMU)/install.stamp
+$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/libs.stamp: \
+		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/install.stamp
 	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libgcc_s_seh*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
 	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libssp*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
 	$(WIN64)-gcc -print-search-dirs | grep ^libraries | cut -d= -f2- | tr : "\n" | xargs -I {} find {} -iname "libwinpthread*.dll" | xargs cp -t $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)/bin
