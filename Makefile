@@ -4,7 +4,7 @@ include scripts/Freedom.mk
 # Include version identifiers to build up the full version string
 include Version.mk
 PACKAGE_HEADING := freedom-qemu-system
-PACKAGE_VERSION := $(RISCV_QEMU_VERSION)-$(FREEDOM_QEMU_SYSTEM_CODELINE)$(FREEDOM_QEMU_SYSTEM_GENERATION)b$(FREEDOM_QEMU_SYSTEM_BUILD)
+PACKAGE_VERSION := $(RISCV_QEMU_VERSION)-$(FREEDOM_QEMU_SYSTEM_ID)
 
 # Source code directory references
 SRCNAME_QEMU := riscv-qemu
@@ -59,33 +59,36 @@ $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/libs.stamp: \
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	rm -rf $($@_INSTALL)
 	mkdir -p $($@_INSTALL)
+	rm -rf $($@_REC)
+	mkdir -p $($@_REC)
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
-	cd $(dir $@); curl -L -f -s -o zlib-1.2.11.tar.gz http://zlib.net/fossils/zlib-1.2.11.tar.gz
-	cd $(dir $@); $(TAR) -xf zlib-1.2.11.tar.gz
+	cd $($@_REC); curl -L -f -s -o zlib-1.2.11.tar.gz http://zlib.net/fossils/zlib-1.2.11.tar.gz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/zlib-1.2.11.tar.gz
 	cd $(dir $@); mv zlib-1.2.11 zlib
-	cd $(dir $@); curl -L -f -s -o libffi-3.2.1.tar.gz http://mirrors.kernel.org/sourceware/libffi/libffi-3.2.1.tar.gz
-	cd $(dir $@); $(TAR) -xf libffi-3.2.1.tar.gz
+	cd $($@_REC); curl -L -f -s -o libffi-3.2.1.tar.gz http://mirrors.kernel.org/sourceware/libffi/libffi-3.2.1.tar.gz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/libffi-3.2.1.tar.gz
 	cd $(dir $@); mv libffi-3.2.1 libffi
-	cd $(dir $@); curl -L -f -s -o libiconv-1.15.tar.gz https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.15.tar.gz
-	cd $(dir $@); $(TAR) -xf libiconv-1.15.tar.gz
+	cd $($@_REC); curl -L -f -s -o libiconv-1.15.tar.gz https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.15.tar.gz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/libiconv-1.15.tar.gz
 	cd $(dir $@); mv libiconv-1.15 libiconv
-	cd $(dir $@); curl -L -f -s -o gettext-0.19.8.1.tar.gz https://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.1.tar.gz
-	cd $(dir $@); $(TAR) -xf gettext-0.19.8.1.tar.gz
+	cd $($@_REC); curl -L -f -s -o gettext-0.19.8.1.tar.gz https://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.1.tar.gz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/gettext-0.19.8.1.tar.gz
 	cd $(dir $@); mv gettext-0.19.8.1 gettext
-	cd $(dir $@); curl -L -f -s -o glib-2.56.4.tar.xz http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.56/glib-2.56.4.tar.xz
-	cd $(dir $@); $(TAR) -xf glib-2.56.4.tar.xz
+	cd $($@_REC); curl -L -f -s -o glib-2.56.4.tar.xz http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.56/glib-2.56.4.tar.xz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/glib-2.56.4.tar.xz
 	cd $(dir $@); mv glib-2.56.4 glib
-	cd $(dir $@); curl -L -f -s -o libpng-1.6.36.tar.gz https://sourceforge.net/projects/libpng/files/libpng16/1.6.36/libpng-1.6.36.tar.gz
-	cd $(dir $@); $(TAR) -xf libpng-1.6.36.tar.gz
+	cd $($@_REC); curl -L -f -s -o libpng-1.6.36.tar.gz https://sourceforge.net/projects/libpng/files/libpng16/1.6.36/libpng-1.6.36.tar.gz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/libpng-1.6.36.tar.gz
 	cd $(dir $@); mv libpng-1.6.36 libpng
-	cd $(dir $@); curl -L -f -s -o jpegsrc.v9b.tar.gz http://www.ijg.org/files/jpegsrc.v9b.tar.gz
-	cd $(dir $@); $(TAR) -xf jpegsrc.v9b.tar.gz
+	cd $($@_REC); curl -L -f -s -o jpegsrc.v9b.tar.gz http://www.ijg.org/files/jpegsrc.v9b.tar.gz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/jpegsrc.v9b.tar.gz
 	cd $(dir $@); mv jpeg-9b jpeg
-	cd $(dir $@); curl -L -f -s -o pixman-0.38.0.tar.gz https://cairographics.org/releases/pixman-0.38.0.tar.gz
-	cd $(dir $@); $(TAR) -xf pixman-0.38.0.tar.gz
+	cd $($@_REC); curl -L -f -s -o pixman-0.38.0.tar.gz https://cairographics.org/releases/pixman-0.38.0.tar.gz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/pixman-0.38.0.tar.gz
 	cd $(dir $@); mv pixman-0.38.0 pixman
 	cp -a $(SRCPATH_QEMU) $(dir $@)
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
@@ -105,17 +108,19 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 
 $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/zlib/build.stamp: \
 		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/source.stamp
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/zlib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($(NATIVE)-deps-vars) ./configure \
 		--prefix=$(abspath $(OBJ_NATIVE)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)) \
-		$($(NATIVE)-zlib-configure) &>make-configure.log
-	$(MAKE) -C $(dir $@) &>$(dir $@)/make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		$($(NATIVE)-zlib-configure) &>$($@_REC)/zlib-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/zlib-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/zlib-make-install.log
 	date > $@
 
 $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/zlib/build.stamp: \
 		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/source.stamp
-	$(MAKE) -C $(dir $@) -f win32/Makefile.gcc PREFIX=$(WIN64)- prefix=$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/ &>$(dir $@)/make-build.log
-	$(MAKE) -j1 -C $(dir $@) -f win32/Makefile.gcc SHARED_MODE=1 install DESTDIR=$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/ INCLUDE_PATH=include LIBRARY_PATH=lib BINARY_PATH=bin &>$(dir $@)/make-install.log
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/zlib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(MAKE) -C $(dir $@) -f win32/Makefile.gcc PREFIX=$(WIN64)- prefix=$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/ &>$($@_REC)/zlib-make-build.log
+	$(MAKE) -j1 -C $(dir $@) -f win32/Makefile.gcc SHARED_MODE=1 install DESTDIR=$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/ INCLUDE_PATH=include LIBRARY_PATH=lib BINARY_PATH=bin &>$($@_REC)/zlib-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp: \
@@ -124,12 +129,13 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/libffi/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/libffi/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/libffi/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($($@_TARGET)-deps-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--enable-static &>make-configure.log
-	$(MAKE) -C $(dir $@) &>$(dir $@)/make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		--enable-static &>$($@_REC)/libffi-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/libffi-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/libffi-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libiconv/build.stamp: \
@@ -138,12 +144,13 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libiconv/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($($@_TARGET)-deps-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--enable-static &>make-configure.log
-	$(MAKE) -C $(dir $@) &>$(dir $@)/make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		--enable-static &>$($@_REC)/libiconv-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/libiconv-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/libiconv-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
@@ -152,13 +159,14 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/gettext/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($($@_TARGET)-deps-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
 		--enable-static \
-		$($($@_TARGET)-gettext-configure) &>make-configure.log
-	$(MAKE) -C $(dir $@) &>$(dir $@)/make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		$($($@_TARGET)-gettext-configure) &>$($@_REC)/gettext-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/gettext-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/gettext-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp: \
@@ -167,6 +175,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)/gio/lib
 	cd $(dir $@) && $($($@_TARGET)-glib-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
@@ -186,9 +195,9 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 		--disable-znodelete \
 		--disable-compile-warnings \
 		--disable-installed-tests \
-		--disable-always-build-tests &>make-configure.log
-	$(MAKE) -C $(dir $@) &>$(dir $@)/make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		--disable-always-build-tests &>$($@_REC)/glib-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/glib-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/glib-make-install.log
 	rm -rf $(abspath $($@_INSTALL))/share/gdb
 	date > $@
 
@@ -198,12 +207,13 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libpng/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libpng/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/libpng/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/libpng/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/libpng/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($($@_TARGET)-libpng-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--enable-static &>make-configure.log
-	$(MAKE) -C $(dir $@) &>$(dir $@)/make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		--enable-static &>$($@_REC)/libpng-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/libpng-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/libpng-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/jpeg/build.stamp: \
@@ -212,12 +222,13 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/jpeg/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/jpeg/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/jpeg/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/jpeg/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/jpeg/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($($@_TARGET)-deps-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--enable-static &>make-configure.log
-	$(MAKE) -C $(dir $@) &>$(dir $@)/make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		--enable-static &>$($@_REC)/jpeg-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/jpeg-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/jpeg-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp: \
@@ -226,15 +237,16 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)/test/lib
 	cd $(dir $@) && $($($@_TARGET)-pixman-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
 		--enable-static \
 		--with-gnu-ld \
-		--disable-static-testprogs &>make-configure.log
-	$(MAKE) -C $(dir $@) &>$(dir $@)/make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		--disable-static-testprogs &>$($@_REC)/pixman-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/pixman-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/pixman-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
@@ -244,17 +256,18 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	rm -f $(abspath $($@_INSTALL))/lib/lib*.dylib*
 	rm -f $(abspath $($@_INSTALL))/lib/lib*.so*
 	rm -f $(abspath $($@_INSTALL))/lib64/lib*.so*
 	cd $(dir $@) && $($($@_TARGET)-rqemu-vars) ./configure \
 		$($($@_TARGET)-rqemu-cross) \
 		--prefix=$(abspath $($@_INSTALL))$($($@_TARGET)-rqemu-bindir) \
-		--with-pkgversion="SiFive QEMU $(PACKAGE_VERSION)" \
+		--with-pkgversion="SiFive QEMU-System $(PACKAGE_VERSION)" \
 		--target-list=riscv32-softmmu,riscv64-softmmu \
 		--interp-prefix=$(abspath $($@_INSTALL))/sysroot \
 		--disable-libusb \
 		--disable-vhost-user \
-		--disable-vhost-kernel &>make-configure.log
-	$($($@_TARGET)-rqemu-vars) $(MAKE) -C $(dir $@) -j1 install &>$(dir $@)/make-install.log
+		--disable-vhost-kernel &>$($@_REC)/$(SRCNAME_QEMU)-make-configure.log
+	$($($@_TARGET)-rqemu-vars) $(MAKE) -C $(dir $@) -j1 install &>$($@_REC)//$(SRCNAME_QEMU)-make-install.log
 	date > $@

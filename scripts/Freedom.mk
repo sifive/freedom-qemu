@@ -1,6 +1,30 @@
 # The default target
-.PHONY: all package
+.PHONY: all
 all:
+	@echo " Makefile targets: package cleanup clean help all"
+
+.PHONY: help
+help:
+	@echo ""
+	@echo " SiFive Freedom Tools - Makefile targets:"
+	@echo ""
+	@echo " package"
+	@echo "   Build the binary packages for this repo."
+	@echo ""
+	@echo " cleanup"
+	@echo "   Clean the build artifacts for this repo."
+	@echo ""
+	@echo " clean"
+	@echo "   Remove the bin and obj directories."
+	@echo ""
+	@echo " help"
+	@echo "   Show this help."
+	@echo ""
+	@echo " all"
+	@echo "   Show Makefile targets."
+	@echo ""
+
+.PHONY: package
 package:
 
 # Make uses /bin/sh by default, ignoring the user's value of SHELL.
@@ -13,6 +37,7 @@ PREFIXPATH ?=
 BINDIR := $(POSTFIXPATH)bin
 OBJDIR := $(POSTFIXPATH)obj
 SRCDIR := $(PREFIXPATH)src
+RECDIR := $(PREFIXPATH)rec
 SCRIPTSDIR := $(PREFIXPATH)scripts
 PATCHESDIR := $(PREFIXPATH)patches
 
@@ -25,13 +50,10 @@ DARWIN ?= x86_64-apple-darwin
 ifneq ($(wildcard /etc/redhat-release),)
 NATIVE ?= $(REDHAT)
 NINJA ?= ninja-build
-all: redhat
 package: redhat-package
 else ifeq ($(DISTRIB_ID),Ubuntu)
 NATIVE ?= $(UBUNTU64)
-all: ubuntu64
 package: ubuntu64-package
-all: win64
 package: win64-package
 else ifeq ($(shell uname),Darwin)
 NATIVE ?= $(DARWIN)
@@ -39,7 +61,6 @@ LIBTOOLIZE ?= glibtoolize
 TAR ?= gtar
 SED ?= gsed
 AWK ?= gawk
-all: darwin
 package: darwin-package
 else
 $(error Unknown host)
@@ -60,4 +81,4 @@ OBJ_REDHAT   := $(OBJDIR)/$(REDHAT)
 # Targets that don't build anything
 .PHONY: clean
 clean::
-	rm -rf $(OBJDIR) $(BINDIR)
+	rm -rf $(RECDIR)* $(OBJDIR) $(BINDIR)
