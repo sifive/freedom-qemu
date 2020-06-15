@@ -3,8 +3,8 @@ include scripts/Freedom.mk
 
 # Include version identifiers to build up the full version string
 include Version.mk
-PACKAGE_HEADING := freedom-qemu-system
-PACKAGE_VERSION := $(RISCV_QEMU_VERSION)-$(FREEDOM_QEMU_SYSTEM_ID)$(EXTRA_SUFFIX)
+PACKAGE_HEADING := freedom-qemu-target
+PACKAGE_VERSION := $(RISCV_QEMU_VERSION)-$(FREEDOM_QEMU_TARGET_ID)$(EXTRA_SUFFIX)
 
 # Source code directory references
 SRCNAME_QEMU := riscv-qemu
@@ -267,7 +267,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 	cd $(dir $@) && $($($@_TARGET)-rqemu-vars) ./configure \
 		$($($@_TARGET)-rqemu-cross) \
 		--prefix=$(abspath $($@_INSTALL))$($($@_TARGET)-rqemu-bindir) \
-		--with-pkgversion="SiFive QEMU-System $(PACKAGE_VERSION)" \
+		--with-pkgversion="SiFive QEMU-Target $(PACKAGE_VERSION)" \
 		--target-list=riscv32-softmmu,riscv64-softmmu \
 		--interp-prefix=$(abspath $($@_INSTALL))/sysroot \
 		--disable-libusb \

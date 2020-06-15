@@ -2,4 +2,4 @@
 RISCV_QEMU_VERSION := 4.2.0
 
 # Customization ID, which should identify the customization added to the original by SiFive
-FREEDOM_QEMU_SYSTEM_ID := sifive1.0.0
+FREEDOM_QEMU_TARGET_ID := sifive1.0.0
