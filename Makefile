@@ -4,7 +4,7 @@ include scripts/Freedom.mk
 # Include version identifiers to build up the full version string
 include Version.mk
 PACKAGE_HEADING := freedom-qemu-system
-PACKAGE_VERSION := $(RISCV_QEMU_VERSION)-$(FREEDOM_QEMU_SYSTEM_ID)
+PACKAGE_VERSION := $(RISCV_QEMU_VERSION)-$(FREEDOM_QEMU_SYSTEM_ID)$(EXTRA_SUFFIX)
 
 # Source code directory references
 SRCNAME_QEMU := riscv-qemu
@@ -41,7 +41,11 @@ include scripts/Package.mk
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp
+	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp,%,$@))
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	mkdir -p $(dir $@)
+	git log > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).commitlog
+	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
 	date > $@
 
 # We might need some extra target libraries for this package
@@ -270,4 +274,12 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 		--disable-vhost-user \
 		--disable-vhost-kernel &>$($@_REC)/$(SRCNAME_QEMU)-make-configure.log
 	$($($@_TARGET)-rqemu-vars) $(MAKE) -C $(dir $@) -j1 install &>$($@_REC)//$(SRCNAME_QEMU)-make-install.log
+	date > $@
+
+$(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/test.stamp: \
+		$(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/launch.stamp
+	mkdir -p $(dir $@)
+	PATH=$(abspath $(OBJDIR)/$(NATIVE)/launch/$(PACKAGE_TARNAME)/bin):$(PATH) qemu-system-riscv32 -version
+	PATH=$(abspath $(OBJDIR)/$(NATIVE)/launch/$(PACKAGE_TARNAME)/bin):$(PATH) qemu-system-riscv64 -version
+	@echo "Finished testing $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).tar.gz tarball"
 	date > $@

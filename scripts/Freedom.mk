@@ -11,6 +11,9 @@ help:
 	@echo " package"
 	@echo "   Build the binary packages for this repo."
 	@echo ""
+	@echo " regress"
+	@echo "   Test the prebuilt packages for this repo."
+	@echo ""
 	@echo " cleanup"
 	@echo "   Clean the build artifacts for this repo."
 	@echo ""
@@ -26,6 +29,9 @@ help:
 
 .PHONY: package
 package:
+
+.PHONY: regress
+regress:
 
 # Make uses /bin/sh by default, ignoring the user's value of SHELL.
 # Some systems now ship with /bin/sh pointing at dash, and this Makefile
@@ -51,10 +57,12 @@ ifneq ($(wildcard /etc/redhat-release),)
 NATIVE ?= $(REDHAT)
 NINJA ?= ninja-build
 package: redhat-package
+regress: native-regress
 else ifeq ($(DISTRIB_ID),Ubuntu)
 NATIVE ?= $(UBUNTU64)
 package: ubuntu64-package
 package: win64-package
+regress: native-regress
 else ifeq ($(shell uname),Darwin)
 NATIVE ?= $(DARWIN)
 LIBTOOLIZE ?= glibtoolize
@@ -62,6 +70,10 @@ TAR ?= gtar
 SED ?= gsed
 AWK ?= gawk
 package: darwin-package
+regress: native-regress
+else ifneq ($(wildcard /mingw64/etc),)
+NATIVE ?= $(WIN64)
+regress: native-regress
 else
 $(error Unknown host)
 endif
