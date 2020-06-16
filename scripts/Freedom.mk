@@ -1,7 +1,7 @@
 # The default target
 .PHONY: all
 all:
-	@echo " Makefile targets: package cleanup clean help all"
+	@echo " Makefile targets: package regress cleanup flushup clean flush help all"
 
 .PHONY: help
 help:
@@ -17,8 +17,14 @@ help:
 	@echo " cleanup"
 	@echo "   Clean the build artifacts for this repo."
 	@echo ""
+	@echo " flushup"
+	@echo "   Flush the build artifacts for this repo."
+	@echo ""
 	@echo " clean"
 	@echo "   Remove the bin and obj directories."
+	@echo ""
+	@echo " flush"
+	@echo "   Remove the obj directory."
 	@echo ""
 	@echo " help"
 	@echo "   Show this help."
@@ -94,3 +100,7 @@ OBJ_REDHAT   := $(OBJDIR)/$(REDHAT)
 .PHONY: clean
 clean::
 	rm -rf $(RECDIR)* $(OBJDIR) $(BINDIR)
+
+.PHONY: flush
+flush::
+	rm -rf $(RECDIR)* $(OBJDIR)
