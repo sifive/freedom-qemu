@@ -3,7 +3,7 @@ include scripts/Freedom.mk
 
 # Include version identifiers to build up the full version string
 include Version.mk
-PACKAGE_HEADING := freedom-qemu-target
+PACKAGE_HEADING := riscv-qemu
 PACKAGE_VERSION := $(RISCV_QEMU_VERSION)-$(FREEDOM_QEMU_TARGET_ID)$(EXTRA_SUFFIX)
 
 # Source code directory references
@@ -12,6 +12,7 @@ SRCPATH_QEMU := $(SRCDIR)/$(SRCNAME_QEMU)
 
 # Some special package configure flags for specific targets
 $(WIN64)-rqemu-vars          := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
+$(WIN64)-rqemu-vars-ext      := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
 $(WIN64)-rqemu-host          := --host=$(WIN64)
 $(WIN64)-rqemu-cross         := --cross-prefix=x86_64-w64-mingw32-
 $(WIN64)-rqemu-bindir        := /bin
@@ -22,11 +23,13 @@ $(WIN64)-pixman-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/
 $(UBUNTU64)-rqemu-host       := --host=x86_64-linux-gnu
 $(UBUNTU64)-gettext-configure:= --enable-threads=posix
 $(UBUNTU64)-glib-vars        := PKG_CONFIG_PATH="$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include"
-$(DARWIN)-rqemu-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib/pkgconfig" CFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/include" CPPFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/include" LDFLAGS="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib -liconv -framework CoreFoundation -framework Carbon" PATH=/usr/local/opt/gettext/bin:$(PATH)
+$(DARWIN)-rqemu-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/lib/pkgconfig" CFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/include" CPPFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/lib" LIBS="-liconv -framework CoreFoundation -framework Carbon" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/lib -liconv -framework CoreFoundation -framework Carbon" PATH=/usr/local/opt/gettext/bin:$(PATH)
+$(DARWIN)-rqemu-vars-ext     := PKG_CONFIG_PATH="$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/lib/pkgconfig" CFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/include" CPPFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/lib" LIBS="-lgmodule-2.0 -lffi -liconv -lresolv -framework CoreFoundation -framework Carbon" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(DARWIN))/lib -liconv -framework CoreFoundation -framework Carbon" PATH=/usr/local/opt/gettext/bin:$(PATH)
 $(DARWIN)-gettext-configure  := --enable-threads=posix
 $(DARWIN)-glib-configure     := --enable-static
 $(DARWIN)-glib-vars          := PKG_CONFIG_PATH="$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib -I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/include" PATH=/usr/local/opt/gettext/bin:$(PATH)
-$(REDHAT)-rqemu-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/lib/pkgconfig" CFLAGS="-fPIC -I$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/include -Wno-unused-result" CPPFLAGS="-fPIC -I$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/include" LDFLAGS="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/lib -liconv" LIBS="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/lib -liconv" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/lib -liconv"
+$(REDHAT)-rqemu-vars         := PKG_CONFIG_LIBDIR="$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib/pkgconfig" CFLAGS="-fPIC -I$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/include -Wno-unused-result" CPPFLAGS="-fPIC -I$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib -L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib64" LIBS="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib -L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib64 -liconv" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib -L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib64 -liconv"
+$(REDHAT)-rqemu-vars-ext     := PKG_CONFIG_LIBDIR="$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib/pkgconfig" CFLAGS="-fPIC -I$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/include -Wno-unused-result" CPPFLAGS="-fPIC -I$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib -L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib64" LIBS="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib -L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib64 -lgmodule-2.0 -lffi -liconv -lresolv -ldl" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib -L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(RQEMU_VERSION)-$(REDHAT))/lib64 -liconv"
 $(REDHAT)-zlib-configure     := -static
 $(REDHAT)-gettext-configure  := --enable-threads=posix
 $(REDHAT)-glib-configure     := --enable-static
@@ -95,6 +98,8 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	cd $(dir $@); $(TAR) -xf $($@_REC)/pixman-0.38.0.tar.gz
 	cd $(dir $@); mv pixman-0.38.0 pixman
 	cp -a $(SRCPATH_QEMU) $(dir $@)
+	rm -rf $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
+	cp -a $(PATCHESDIR)/qemu-riscv-cpu.c $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
 	cp -a $(PATCHESDIR)/qemu-sifive-e.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_test.c
@@ -107,7 +112,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	cp -a $(PATCHESDIR)/qemu-sifive-u.h $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_u.h
 	$(SED) -i -f $(PATCHESDIR)/qemu-configure.sed $(dir $@)/$(SRCNAME_QEMU)/configure
 	$(SED) -i -f $(PATCHESDIR)/qemu-common.sed $(dir $@)/$(SRCNAME_QEMU)/include/qemu-common.h
-	$(SED) -i -f $(PATCHESDIR)/qemu-vl.sed $(dir $@)/$(SRCNAME_QEMU)/vl.c
+	$(SED) -i -f $(PATCHESDIR)/qemu-vl.sed $(dir $@)/$(SRCNAME_QEMU)/softmmu/vl.c
 	date > $@
 
 $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/zlib/build.stamp: \
@@ -271,9 +276,10 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 		--target-list=riscv32-softmmu,riscv64-softmmu \
 		--interp-prefix=$(abspath $($@_INSTALL))/sysroot \
 		--disable-libusb \
+		--disable-vhost-vdpa \
 		--disable-vhost-user \
 		--disable-vhost-kernel &>$($@_REC)/$(SRCNAME_QEMU)-make-configure.log
-	$($($@_TARGET)-rqemu-vars) $(MAKE) -C $(dir $@) -j1 install &>$($@_REC)//$(SRCNAME_QEMU)-make-install.log
+	$($($@_TARGET)-rqemu-vars-ext) $(MAKE) -C $(dir $@) -j1 install &>$($@_REC)//$(SRCNAME_QEMU)-make-install.log
 	date > $@
 
 $(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/test.stamp: \
