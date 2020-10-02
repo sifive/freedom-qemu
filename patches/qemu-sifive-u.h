@@ -30,6 +30,10 @@
 #define RISCV_U_SOC(obj) \
     OBJECT_CHECK(SiFiveUSoCState, (obj), TYPE_RISCV_U_SOC)
 
+#define TYPE_RISCV_VIU_SOC "riscv.sifive.viu.soc"
+#define RISCV_VIU_SOC(obj) \
+    OBJECT_CHECK(SiFiveUSoCState, (obj), TYPE_RISCV_VIU_SOC)
+
 typedef struct SiFiveUSoCState {
     /*< private >*/
     DeviceState parent_obj;
@@ -48,6 +52,10 @@ typedef struct SiFiveUSoCState {
 #define TYPE_RISCV_U_MACHINE MACHINE_TYPE_NAME("sifive_u")
 #define RISCV_U_MACHINE(obj) \
     OBJECT_CHECK(SiFiveUState, (obj), TYPE_RISCV_U_MACHINE)
+
+#define TYPE_RISCV_VIU_MACHINE MACHINE_TYPE_NAME("sifive_viu")
+#define RISCV_VIU_MACHINE(obj) \
+    OBJECT_CHECK(SiFiveUState, (obj), TYPE_RISCV_VIU_MACHINE)
 
 typedef struct SiFiveUState {
     /*< private >*/

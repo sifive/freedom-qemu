@@ -18,7 +18,6 @@ $(WIN64)-rqemu-cross         := --cross-prefix=x86_64-w64-mingw32-
 $(WIN64)-rqemu-bindir        := /bin
 $(WIN64)-gettext-configure   := --enable-threads=windows
 $(WIN64)-glib-vars           := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
-#$(WIN64)-libpng-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
 $(WIN64)-pixman-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
 $(UBUNTU64)-rqemu-vars       := PKG_CONFIG_LIBDIR="$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib/pkgconfig" CFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include -Wno-unused-result" CPPFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64" LIBS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -liconv" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -liconv"
 $(UBUNTU64)-rqemu-vars-ext   := PKG_CONFIG_LIBDIR="$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib/pkgconfig" CFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include -Wno-unused-result" CPPFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64" LIBS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -lgmodule-2.0 -lffi -liconv -lresolv -ldl" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -liconv"
@@ -40,7 +39,6 @@ $(REDHAT)-zlib-configure     := -static
 $(REDHAT)-gettext-configure  := --enable-threads=posix
 $(REDHAT)-glib-configure     := --enable-static
 $(REDHAT)-glib-vars          := PKG_CONFIG_PATH="$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/lib/pkgconfig" CFLAGS="-fPIC -L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/lib -I$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/include"
-#$(REDHAT)-libpng-vars        := CFLAGS="-fPIC" CPPFLAGS="-fPIC"
 $(REDHAT)-pixman-vars        := CFLAGS="-fPIC" CPPFLAGS="-fPIC"
 $(REDHAT)-deps-vars          := CFLAGS="-fPIC"
 
@@ -95,18 +93,14 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	cd $($@_REC); curl -L -f -s -o glib-2.56.4.tar.xz http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.56/glib-2.56.4.tar.xz
 	cd $(dir $@); $(TAR) -xf $($@_REC)/glib-2.56.4.tar.xz
 	cd $(dir $@); mv glib-2.56.4 glib
-#	cd $($@_REC); curl -L -f -s -o libpng-1.6.36.tar.gz https://sourceforge.net/projects/libpng/files/libpng16/1.6.36/libpng-1.6.36.tar.gz
-#	cd $(dir $@); $(TAR) -xf $($@_REC)/libpng-1.6.36.tar.gz
-#	cd $(dir $@); mv libpng-1.6.36 libpng
-#	cd $($@_REC); curl -L -f -s -o jpegsrc.v9b.tar.gz http://www.ijg.org/files/jpegsrc.v9b.tar.gz
-#	cd $(dir $@); $(TAR) -xf $($@_REC)/jpegsrc.v9b.tar.gz
-#	cd $(dir $@); mv jpeg-9b jpeg
 	cd $($@_REC); curl -L -f -s -o pixman-0.38.0.tar.gz https://cairographics.org/releases/pixman-0.38.0.tar.gz
 	cd $(dir $@); $(TAR) -xf $($@_REC)/pixman-0.38.0.tar.gz
 	cd $(dir $@); mv pixman-0.38.0 pixman
 	cp -a $(SRCPATH_QEMU) $(dir $@)
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
 	cp -a $(PATCHESDIR)/qemu-riscv-cpu.c $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
+	rm -rf $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.h
+	cp -a $(PATCHESDIR)/qemu-riscv-cpu.h $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.h
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
 	cp -a $(PATCHESDIR)/qemu-sifive-e.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_test.c
@@ -216,36 +210,6 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/glib-make-install.log
 	rm -rf $(abspath $($@_INSTALL))/share/gdb
 	date > $@
-
-#$(OBJDIR)/%/build/$(PACKAGE_HEADING)/libpng/build.stamp: \
-#		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp \
-#		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
-#	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libpng/build.stamp,%,$@))
-#	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/libpng/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
-#	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/libpng/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-#	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/libpng/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-#	cd $(dir $@) && $($($@_TARGET)-libpng-vars) ./configure \
-#		$($($@_TARGET)-rqemu-host) \
-#		--prefix=$(abspath $($@_INSTALL)) \
-#		--enable-static &>$($@_REC)/libpng-make-configure.log
-#	$(MAKE) -C $(dir $@) &>$($@_REC)/libpng-make-build.log
-#	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/libpng-make-install.log
-#	date > $@
-
-#$(OBJDIR)/%/build/$(PACKAGE_HEADING)/jpeg/build.stamp: \
-#		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/libpng/build.stamp \
-#		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
-#	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/jpeg/build.stamp,%,$@))
-#	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/jpeg/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
-#	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/jpeg/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-#	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/jpeg/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-#	cd $(dir $@) && $($($@_TARGET)-deps-vars) ./configure \
-#		$($($@_TARGET)-rqemu-host) \
-#		--prefix=$(abspath $($@_INSTALL)) \
-#		--enable-static &>$($@_REC)/jpeg-make-configure.log
-#	$(MAKE) -C $(dir $@) &>$($@_REC)/jpeg-make-build.log
-#	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/jpeg-make-install.log
-#	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp \

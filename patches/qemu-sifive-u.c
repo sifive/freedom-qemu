@@ -754,3 +754,397 @@ static void sifive_u_soc_register_types(void)
 }
 
 type_init(sifive_u_soc_register_types)
+
+
+
+
+
+
+
+
+
+
+
+
+static void sifive_viu_machine_reset(void *opaque, int n, int level)
+{
+    /* gpio pin active low triggers reset */
+    if (!level) {
+        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
+    }
+}
+
+static void sifive_viu_machine_init(MachineState *machine)
+{
+    const struct MemmapEntry *memmap = sifive_u_memmap;
+    SiFiveUState *s = RISCV_VIU_MACHINE(machine);
+    MemoryRegion *system_memory = get_system_memory();
+    MemoryRegion *main_mem = g_new(MemoryRegion, 1);
+    MemoryRegion *flash0 = g_new(MemoryRegion, 1);
+    target_ulong start_addr = memmap[SIFIVE_U_DRAM].base;
+    uint32_t start_addr_hi32 = 0x00000000;
+    int i;
+    uint32_t fdt_load_addr;
+    uint64_t kernel_entry;
+
+    /* Initialize SoC */
+    object_initialize_child(OBJECT(machine), "soc", &s->soc, TYPE_RISCV_VIU_SOC);
+    object_property_set_uint(OBJECT(&s->soc), "serial", s->serial,
+                             &error_abort);
+    qdev_realize(DEVICE(&s->soc), NULL, &error_abort);
+
+    /* register RAM */
+    memory_region_init_ram(main_mem, NULL, "riscv.sifive.u.ram",
+                           machine->ram_size, &error_fatal);
+    memory_region_add_subregion(system_memory, memmap[SIFIVE_U_DRAM].base,
+                                main_mem);
+
+    /* register QSPI0 Flash */
+    memory_region_init_ram(flash0, NULL, "riscv.sifive.u.flash0",
+                           memmap[SIFIVE_U_FLASH0].size, &error_fatal);
+    memory_region_add_subregion(system_memory, memmap[SIFIVE_U_FLASH0].base,
+                                flash0);
+
+    /* register gpio-restart */
+    qdev_connect_gpio_out(DEVICE(&(s->soc.gpio)), 10,
+                          qemu_allocate_irq(sifive_viu_machine_reset, NULL, 0));
+
+    /* create device tree */
+    create_fdt(s, memmap, machine->ram_size, machine->kernel_cmdline);
+
+    if (s->start_in_flash) {
+        /*
+         * If start_in_flash property is given, assign s->msel to a value
+         * that representing booting from QSPI0 memory-mapped flash.
+         *
+         * This also means that when both start_in_flash and msel properties
+         * are given, start_in_flash takes the precedence over msel.
+         *
+         * Note this is to keep backward compatibility not to break existing
+         * users that use start_in_flash property.
+         */
+        s->msel = MSEL_MEMMAP_QSPI0_FLASH;
+    }
+
+    switch (s->msel) {
+    case MSEL_MEMMAP_QSPI0_FLASH:
+        start_addr = memmap[SIFIVE_U_FLASH0].base;
+        break;
+    case MSEL_L2LIM_QSPI0_FLASH:
+    case MSEL_L2LIM_QSPI2_SD:
+        start_addr = memmap[SIFIVE_U_L2LIM].base;
+        break;
+    default:
+        start_addr = memmap[SIFIVE_U_DRAM].base;
+        break;
+    }
+
+    riscv_find_and_load_firmware(machine, BIOS_FILENAME, start_addr, NULL);
+
+    if (machine->kernel_filename) {
+        kernel_entry = riscv_load_kernel(machine->kernel_filename, NULL);
+
+        if (machine->initrd_filename) {
+            hwaddr start;
+            hwaddr end = riscv_load_initrd(machine->initrd_filename,
+                                           machine->ram_size, kernel_entry,
+                                           &start);
+            qemu_fdt_setprop_cell(s->fdt, "/chosen",
+                                  "linux,initrd-start", start);
+            qemu_fdt_setprop_cell(s->fdt, "/chosen", "linux,initrd-end",
+                                  end);
+        }
+    } else {
+       /*
+        * If dynamic firmware is used, it doesn't know where is the next mode
+        * if kernel argument is not set.
+        */
+        kernel_entry = 0;
+    }
+
+    /* Compute the fdt load address in dram */
+    fdt_load_addr = riscv_load_fdt(memmap[SIFIVE_U_DRAM].base,
+                                   machine->ram_size, s->fdt);
+    #if defined(TARGET_RISCV64)
+    start_addr_hi32 = start_addr >> 32;
+    #endif
+
+    /* reset vector */
+    uint32_t reset_vec[11] = {
+        s->msel,                       /* MSEL pin state */
+        0x00000297,                    /* 1:  auipc  t0, %pcrel_hi(fw_dyn) */
+        0x02828613,                    /*     addi   a2, t0, %pcrel_lo(1b) */
+        0xf1402573,                    /*     csrr   a0, mhartid  */
+#if defined(TARGET_RISCV32)
+        0x0202a583,                    /*     lw     a1, 32(t0) */
+        0x0182a283,                    /*     lw     t0, 24(t0) */
+#elif defined(TARGET_RISCV64)
+        0x0202b583,                    /*     ld     a1, 32(t0) */
+        0x0182b283,                    /*     ld     t0, 24(t0) */
+#endif
+        0x00028067,                    /*     jr     t0 */
+        start_addr,                    /* start: .dword */
+        start_addr_hi32,
+        fdt_load_addr,                 /* fdt_laddr: .dword */
+        0x00000000,
+                                       /* fw_dyn: */
+    };
+
+    /* copy in the reset vector in little_endian byte order */
+    for (i = 0; i < ARRAY_SIZE(reset_vec); i++) {
+        reset_vec[i] = cpu_to_le32(reset_vec[i]);
+    }
+    rom_add_blob_fixed_as("mrom.reset", reset_vec, sizeof(reset_vec),
+                          memmap[SIFIVE_U_MROM].base, &address_space_memory);
+
+    riscv_rom_copy_firmware_info(memmap[SIFIVE_U_MROM].base,
+                                 memmap[SIFIVE_U_MROM].size,
+                                 sizeof(reset_vec), kernel_entry);
+}
+
+static bool sifive_viu_machine_get_start_in_flash(Object *obj, Error **errp)
+{
+    SiFiveUState *s = RISCV_VIU_MACHINE(obj);
+
+    return s->start_in_flash;
+}
+
+static void sifive_viu_machine_set_start_in_flash(Object *obj, bool value, Error **errp)
+{
+    SiFiveUState *s = RISCV_VIU_MACHINE(obj);
+
+    s->start_in_flash = value;
+}
+
+static void sifive_viu_machine_get_uint32_prop(Object *obj, Visitor *v,
+                                             const char *name, void *opaque,
+                                             Error **errp)
+{
+    visit_type_uint32(v, name, (uint32_t *)opaque, errp);
+}
+
+static void sifive_viu_machine_set_uint32_prop(Object *obj, Visitor *v,
+                                             const char *name, void *opaque,
+                                             Error **errp)
+{
+    visit_type_uint32(v, name, (uint32_t *)opaque, errp);
+}
+
+static void sifive_viu_machine_instance_init(Object *obj)
+{
+    SiFiveUState *s = RISCV_VIU_MACHINE(obj);
+
+    s->start_in_flash = false;
+    object_property_add_bool(obj, "start-in-flash",
+                             sifive_viu_machine_get_start_in_flash,
+                             sifive_viu_machine_set_start_in_flash);
+    object_property_set_description(obj, "start-in-flash",
+                                    "Set on to tell QEMU's ROM to jump to "
+                                    "flash. Otherwise QEMU will jump to DRAM "
+                                    "or L2LIM depending on the msel value");
+
+    s->msel = 0;
+    object_property_add(obj, "msel", "uint32",
+                        sifive_viu_machine_get_uint32_prop,
+                        sifive_viu_machine_set_uint32_prop, NULL, &s->msel);
+    object_property_set_description(obj, "msel",
+                                    "Mode Select (MSEL[3:0]) pin state");
+
+    s->serial = OTP_SERIAL;
+    object_property_add(obj, "serial", "uint32",
+                        sifive_viu_machine_get_uint32_prop,
+                        sifive_viu_machine_set_uint32_prop, NULL, &s->serial);
+    object_property_set_description(obj, "serial", "Board serial number");
+}
+
+static void sifive_viu_machine_class_init(ObjectClass *oc, void *data)
+{
+    MachineClass *mc = MACHINE_CLASS(oc);
+
+    mc->desc = "RISC-V Board compatible with SiFive VIU SDK";
+    mc->init = sifive_viu_machine_init;
+    mc->max_cpus = 4;
+    mc->min_cpus = 1;
+    mc->default_cpus = mc->min_cpus;
+}
+
+static const TypeInfo sifive_viu_machine_typeinfo = {
+    .name       = MACHINE_TYPE_NAME("sifive_viu"),
+    .parent     = TYPE_MACHINE,
+    .class_init = sifive_viu_machine_class_init,
+    .instance_init = sifive_viu_machine_instance_init,
+    .instance_size = sizeof(SiFiveUState),
+};
+
+static void sifive_viu_machine_init_register_types(void)
+{
+    type_register_static(&sifive_viu_machine_typeinfo);
+}
+
+type_init(sifive_viu_machine_init_register_types)
+
+static void sifive_viu_soc_instance_init(Object *obj)
+{
+    MachineState *ms = MACHINE(qdev_get_machine());
+    SiFiveUSoCState *s = RISCV_VIU_SOC(obj);
+
+    object_initialize_child(obj, "cpus", &s->cpus,
+                            TYPE_RISCV_HART_ARRAY);
+    qdev_prop_set_uint32(DEVICE(&s->cpus), "num-harts", ms->smp.cpus);
+    qdev_prop_set_uint32(DEVICE(&s->cpus), "hartid-base", 0);
+    qdev_prop_set_string(DEVICE(&s->cpus), "cpu-type", TYPE_RISCV_CPU_SIFIVE_VIU75);
+
+    object_initialize_child(obj, "prci", &s->prci, TYPE_SIFIVE_U_PRCI);
+    object_initialize_child(obj, "otp", &s->otp, TYPE_SIFIVE_U_OTP);
+    object_initialize_child(obj, "gem", &s->gem, TYPE_CADENCE_GEM);
+    object_initialize_child(obj, "gpio", &s->gpio, TYPE_SIFIVE_GPIO);
+}
+
+static void sifive_viu_soc_realize(DeviceState *dev, Error **errp)
+{
+    MachineState *ms = MACHINE(qdev_get_machine());
+    SiFiveUSoCState *s = RISCV_VIU_SOC(dev);
+    const struct MemmapEntry *memmap = sifive_u_memmap;
+    MemoryRegion *system_memory = get_system_memory();
+    MemoryRegion *mask_rom = g_new(MemoryRegion, 1);
+    MemoryRegion *l2lim_mem = g_new(MemoryRegion, 1);
+    char *plic_hart_config;
+    size_t plic_hart_config_len;
+    int i;
+    NICInfo *nd = &nd_table[0];
+
+    sysbus_realize(SYS_BUS_DEVICE(&s->cpus), &error_abort);
+
+    /* boot rom */
+    memory_region_init_rom(mask_rom, OBJECT(dev), "riscv.sifive.u.mrom",
+                           memmap[SIFIVE_U_MROM].size, &error_fatal);
+    memory_region_add_subregion(system_memory, memmap[SIFIVE_U_MROM].base,
+                                mask_rom);
+
+    /*
+     * Add L2-LIM at reset size.
+     * This should be reduced in size as the L2 Cache Controller WayEnable
+     * register is incremented. Unfortunately I don't see a nice (or any) way
+     * to handle reducing or blocking out the L2 LIM while still allowing it
+     * be re returned to all enabled after a reset. For the time being, just
+     * leave it enabled all the time. This won't break anything, but will be
+     * too generous to misbehaving guests.
+     */
+    memory_region_init_ram(l2lim_mem, NULL, "riscv.sifive.u.l2lim",
+                           memmap[SIFIVE_U_L2LIM].size, &error_fatal);
+    memory_region_add_subregion(system_memory, memmap[SIFIVE_U_L2LIM].base,
+                                l2lim_mem);
+
+    /* create PLIC hart topology configuration string */
+    plic_hart_config_len = (strlen(SIFIVE_U_PLIC_HART_CONFIG) + 1) *
+                           ms->smp.cpus;
+    plic_hart_config = g_malloc0(plic_hart_config_len);
+    for (i = 0; i < ms->smp.cpus; i++) {
+        if (i != 0) {
+            strncat(plic_hart_config, "," SIFIVE_U_PLIC_HART_CONFIG,
+                    plic_hart_config_len);
+        } else {
+            strncat(plic_hart_config, "M", plic_hart_config_len);
+        }
+        plic_hart_config_len -= (strlen(SIFIVE_U_PLIC_HART_CONFIG) + 1);
+    }
+
+    /* MMIO */
+    s->plic = sifive_plic_create(memmap[SIFIVE_U_PLIC].base,
+        plic_hart_config,
+        SIFIVE_U_PLIC_NUM_SOURCES,
+        SIFIVE_U_PLIC_NUM_PRIORITIES,
+        SIFIVE_U_PLIC_PRIORITY_BASE,
+        SIFIVE_U_PLIC_PENDING_BASE,
+        SIFIVE_U_PLIC_ENABLE_BASE,
+        SIFIVE_U_PLIC_ENABLE_STRIDE,
+        SIFIVE_U_PLIC_CONTEXT_BASE,
+        SIFIVE_U_PLIC_CONTEXT_STRIDE,
+        memmap[SIFIVE_U_PLIC].size);
+    g_free(plic_hart_config);
+    sifive_uart_create(system_memory, memmap[SIFIVE_U_UART0].base,
+        serial_hd(0), qdev_get_gpio_in(DEVICE(s->plic), SIFIVE_U_UART0_IRQ));
+    sifive_uart_create(system_memory, memmap[SIFIVE_U_UART1].base,
+        serial_hd(1), qdev_get_gpio_in(DEVICE(s->plic), SIFIVE_U_UART1_IRQ));
+    sifive_clint_create(memmap[SIFIVE_U_CLINT].base,
+        memmap[SIFIVE_U_CLINT].size, ms->smp.cpus,
+        SIFIVE_SIP_BASE, SIFIVE_TIMECMP_BASE, SIFIVE_TIME_BASE, false);
+    sifive_test_create(memmap[SIFIVE_U_TEST].base);
+
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->prci), errp)) {
+        return;
+    }
+    sysbus_mmio_map(SYS_BUS_DEVICE(&s->prci), 0, memmap[SIFIVE_U_PRCI].base);
+
+    qdev_prop_set_uint32(DEVICE(&s->gpio), "ngpio", 16);
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->gpio), errp)) {
+        return;
+    }
+    sysbus_mmio_map(SYS_BUS_DEVICE(&s->gpio), 0, memmap[SIFIVE_U_GPIO].base);
+
+    /* Pass all GPIOs to the SOC layer so they are available to the board */
+    qdev_pass_gpios(DEVICE(&s->gpio), dev, NULL);
+
+    /* Connect GPIO interrupts to the PLIC */
+    for (i = 0; i < 16; i++) {
+        sysbus_connect_irq(SYS_BUS_DEVICE(&s->gpio), i,
+                           qdev_get_gpio_in(DEVICE(s->plic),
+                                            SIFIVE_U_GPIO_IRQ0 + i));
+    }
+
+    qdev_prop_set_uint32(DEVICE(&s->otp), "serial", s->serial);
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->otp), errp)) {
+        return;
+    }
+    sysbus_mmio_map(SYS_BUS_DEVICE(&s->otp), 0, memmap[SIFIVE_U_OTP].base);
+
+    /* FIXME use qdev NIC properties instead of nd_table[] */
+    if (nd->used) {
+        qemu_check_nic_model(nd, TYPE_CADENCE_GEM);
+        qdev_set_nic_properties(DEVICE(&s->gem), nd);
+    }
+    object_property_set_int(OBJECT(&s->gem), "revision", GEM_REVISION,
+                            &error_abort);
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->gem), errp)) {
+        return;
+    }
+    sysbus_mmio_map(SYS_BUS_DEVICE(&s->gem), 0, memmap[SIFIVE_U_GEM].base);
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->gem), 0,
+                       qdev_get_gpio_in(DEVICE(s->plic), SIFIVE_U_GEM_IRQ));
+
+    create_unimplemented_device("riscv.sifive.u.gem-mgmt",
+        memmap[SIFIVE_U_GEM_MGMT].base, memmap[SIFIVE_U_GEM_MGMT].size);
+
+    create_unimplemented_device("riscv.sifive.u.dmc",
+        memmap[SIFIVE_U_DMC].base, memmap[SIFIVE_U_DMC].size);
+}
+
+static Property sifive_viu_soc_props[] = {
+    DEFINE_PROP_UINT32("serial", SiFiveUSoCState, serial, OTP_SERIAL),
+    DEFINE_PROP_END_OF_LIST()
+};
+
+static void sifive_viu_soc_class_init(ObjectClass *oc, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(oc);
+
+    device_class_set_props(dc, sifive_viu_soc_props);
+    dc->realize = sifive_viu_soc_realize;
+    /* Reason: Uses serial_hds in realize function, thus can't be used twice */
+    dc->user_creatable = false;
+}
+
+static const TypeInfo sifive_viu_soc_type_info = {
+    .name = TYPE_RISCV_VIU_SOC,
+    .parent = TYPE_DEVICE,
+    .instance_size = sizeof(SiFiveUSoCState),
+    .instance_init = sifive_viu_soc_instance_init,
+    .class_init = sifive_viu_soc_class_init,
+};
+
+static void sifive_viu_soc_register_types(void)
+{
+    type_register_static(&sifive_viu_soc_type_info);
+}
+
+type_init(sifive_viu_soc_register_types)
