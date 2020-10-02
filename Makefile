@@ -19,7 +19,7 @@ $(WIN64)-rqemu-bindir        := /bin
 $(WIN64)-gettext-configure   := --enable-threads=windows
 $(WIN64)-glib-vars           := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
 #$(WIN64)-libpng-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
-#$(WIN64)-pixman-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
+$(WIN64)-pixman-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
 $(UBUNTU64)-rqemu-vars       := PKG_CONFIG_LIBDIR="$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib/pkgconfig" CFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include -Wno-unused-result" CPPFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64" LIBS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -liconv" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -liconv"
 $(UBUNTU64)-rqemu-vars-ext   := PKG_CONFIG_LIBDIR="$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib/pkgconfig" CFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include -Wno-unused-result" CPPFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64" LIBS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -lgmodule-2.0 -lffi -liconv -lresolv -ldl" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -liconv"
 $(UBUNTU64)-rqemu-host       := --host=x86_64-linux-gnu
@@ -27,6 +27,7 @@ $(UBUNTU64)-zlib-configure   := -static
 $(UBUNTU64)-gettext-configure:= --enable-threads=posix
 $(UBUNTU64)-glib-configure   := --enable-static
 $(UBUNTU64)-glib-vars        := PKG_CONFIG_PATH="$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib/pkgconfig" CFLAGS="-fPIC -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include"
+$(UBUNTU64)-pixman-vars      := CFLAGS="-fPIC" CPPFLAGS="-fPIC"
 $(UBUNTU64)-deps-vars        := CFLAGS="-fPIC"
 $(DARWIN)-rqemu-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib/pkgconfig" CFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/include" CPPFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib" LIBS="-liconv -framework CoreFoundation -framework Carbon" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib -liconv -framework CoreFoundation -framework Carbon" PATH=/usr/local/opt/gettext/bin:$(PATH)
 $(DARWIN)-rqemu-vars-ext     := PKG_CONFIG_PATH="$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib/pkgconfig" CFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/include" CPPFLAGS="-I$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib" LIBS="-lgmodule-2.0 -lffi -liconv -lresolv -framework CoreFoundation -framework Carbon" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_DARWIN)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN))/lib -liconv -framework CoreFoundation -framework Carbon" PATH=/usr/local/opt/gettext/bin:$(PATH)
@@ -40,7 +41,7 @@ $(REDHAT)-gettext-configure  := --enable-threads=posix
 $(REDHAT)-glib-configure     := --enable-static
 $(REDHAT)-glib-vars          := PKG_CONFIG_PATH="$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/lib/pkgconfig" CFLAGS="-fPIC -L$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/lib -I$(abspath $(OBJ_REDHAT)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT))/include"
 #$(REDHAT)-libpng-vars        := CFLAGS="-fPIC" CPPFLAGS="-fPIC"
-#$(REDHAT)-pixman-vars        := CFLAGS="-fPIC" CPPFLAGS="-fPIC"
+$(REDHAT)-pixman-vars        := CFLAGS="-fPIC" CPPFLAGS="-fPIC"
 $(REDHAT)-deps-vars          := CFLAGS="-fPIC"
 
 # Setup the package targets and switch into secondary makefile targets
@@ -100,9 +101,9 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 #	cd $($@_REC); curl -L -f -s -o jpegsrc.v9b.tar.gz http://www.ijg.org/files/jpegsrc.v9b.tar.gz
 #	cd $(dir $@); $(TAR) -xf $($@_REC)/jpegsrc.v9b.tar.gz
 #	cd $(dir $@); mv jpeg-9b jpeg
-#	cd $($@_REC); curl -L -f -s -o pixman-0.38.0.tar.gz https://cairographics.org/releases/pixman-0.38.0.tar.gz
-#	cd $(dir $@); $(TAR) -xf $($@_REC)/pixman-0.38.0.tar.gz
-#	cd $(dir $@); mv pixman-0.38.0 pixman
+	cd $($@_REC); curl -L -f -s -o pixman-0.38.0.tar.gz https://cairographics.org/releases/pixman-0.38.0.tar.gz
+	cd $(dir $@); $(TAR) -xf $($@_REC)/pixman-0.38.0.tar.gz
+	cd $(dir $@); mv pixman-0.38.0 pixman
 	cp -a $(SRCPATH_QEMU) $(dir $@)
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
 	cp -a $(PATCHESDIR)/qemu-riscv-cpu.c $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
@@ -246,26 +247,27 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 #	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/jpeg-make-install.log
 #	date > $@
 
-#$(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp: \
-#		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/jpeg/build.stamp \
-#		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
-#	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp,%,$@))
-#	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
-#	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-#	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-#	mkdir -p $(dir $@)/test/lib
-#	cd $(dir $@) && $($($@_TARGET)-pixman-vars) ./configure \
-#		$($($@_TARGET)-rqemu-host) \
-#		--prefix=$(abspath $($@_INSTALL)) \
-#		--enable-static \
-#		--with-gnu-ld \
-#		--disable-static-testprogs &>$($@_REC)/pixman-make-configure.log
-#	$(MAKE) -C $(dir $@) &>$($@_REC)/pixman-make-build.log
-#	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/pixman-make-install.log
-#	date > $@
+$(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp: \
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp \
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
+	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp,%,$@))
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	mkdir -p $(dir $@)/test/lib
+	cd $(dir $@) && $($($@_TARGET)-pixman-vars) ./configure \
+		$($($@_TARGET)-rqemu-host) \
+		--prefix=$(abspath $($@_INSTALL)) \
+		--enable-static \
+		--with-gnu-ld \
+		--disable-static-testprogs &>$($@_REC)/pixman-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/pixman-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/pixman-make-install.log
+	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp \
+		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp \
 		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
