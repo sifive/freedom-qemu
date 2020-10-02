@@ -338,7 +338,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 		--disable-libpmem \
 		--disable-libdaxctl \
 		--disable-curses \
-		--enable-iconv \
+		--disable-iconv \
 		--enable-vnc \
 		--enable-bochs \
 		--enable-cloop \
