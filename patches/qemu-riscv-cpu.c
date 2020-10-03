@@ -139,6 +139,8 @@ static void riscv_base_cpu_init(Object *obj)
     set_resetvec(env, DEFAULT_RSTVEC);
 }
 
+#if defined(TARGET_RISCV64)
+
 static void rvxx_sifive_viu_cpu_init(Object *obj)
 {
     CPURISCVState *env = &RISCV_CPU(obj)->env;
@@ -147,6 +149,8 @@ static void rvxx_sifive_viu_cpu_init(Object *obj)
     set_vext_version(env, VEXT_VERSION_1_00_0);
     set_resetvec(env, 0x1004);
 }
+
+#endif
 
 static void rvxx_sifive_u_cpu_init(Object *obj)
 {
