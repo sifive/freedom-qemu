@@ -1,4 +1,4 @@
-SiFive Freedom QEMU Target Machine
+SiFive Freedom QEMU System Emulator
 --------
 
 At SiFive we've been distributing binary release packages of the
@@ -12,8 +12,8 @@ To be written!
 
 ### To build the tools:
 
-    $ git clone git@github.com:sifive/freedom-qemu-target.git
-    $ cd freedom-qemu-target
+    $ git clone git@github.com:sifive/freedom-qemu.git
+    $ cd freedom-qemu
     $ git submodule update --init --recursive
     $ make package
 

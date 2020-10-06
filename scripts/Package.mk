@@ -36,12 +36,14 @@ $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.zip: \
 	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).tar.gz: \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
 	mkdir -p $(dir $@)
 	$(TAR) --dereference --hard-dereference -C $(OBJDIR)/$(WIN64)/install -c $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64) | gzip > $(abspath $@)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.tar.gz: \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
 	mkdir -p $(dir $@)
 	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 	cp -a $(OBJ_WIN64)/rec/$(PACKAGE_HEADING) $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
