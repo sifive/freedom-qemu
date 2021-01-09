@@ -1,2 +1,2 @@
-s/libs_qga=\"\"/libs_qga=\"$SIFIVE_LIBS_QGA\"/
-s/if compile_prog \"\" \"\$fdt_libs\" \; then/if compile_prog \"\" \"\" \; then/
+s/GLIB_LIBS=$glib_libs/GLIB_LIBS=$glib_libs $SIFIVE_LIBS_QGA/
+s/LIBS_QGA=$libs_qga/LIBS_QGA=$libs_qga $SIFIVE_LIBS_QGA/

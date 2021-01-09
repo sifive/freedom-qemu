@@ -119,7 +119,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
 	cp -a $(PATCHESDIR)/qemu-sifive-e.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_test.c
-	cp -a $(PATCHESDIR)/qemu-sifive-test.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_test.c
+	cp -a $(PATCHESDIR)/qemu-sifive-test.c $(dir $@)/$(SRCNAME_QEMU)/hw/misc/sifive_test.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_u.c
 	cp -a $(PATCHESDIR)/qemu-sifive-u.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_u.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_e.h
@@ -336,6 +336,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 		--enable-parallels \
 		--enable-sheepdog \
 		--enable-rng-none \
+		--enable-fdt=git \
 		&>$($@_REC)/$(SRCNAME_QEMU)-make-configure.log
 	$($($@_TARGET)-rqemu-vars-ext) $(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/$(SRCNAME_QEMU)-make-install.log
 	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/qemu-edid

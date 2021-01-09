@@ -22,9 +22,9 @@
 #include "hw/net/cadence_gem.h"
 #include "hw/riscv/riscv_hart.h"
 #include "hw/riscv/sifive_cpu.h"
-#include "hw/riscv/sifive_gpio.h"
-#include "hw/riscv/sifive_u_prci.h"
-#include "hw/riscv/sifive_u_otp.h"
+#include "hw/gpio/sifive_gpio.h"
+#include "hw/misc/sifive_u_otp.h"
+#include "hw/misc/sifive_u_prci.h"
 
 #define TYPE_RISCV_U_SOC "riscv.sifive.u.soc"
 #define RISCV_U_SOC(obj) \
@@ -47,6 +47,7 @@ typedef struct SiFiveUSoCState {
     CadenceGEMState gem;
 
     uint32_t serial;
+    char *cpu_type;
 } SiFiveUSoCState;
 
 #define TYPE_RISCV_U_MACHINE MACHINE_TYPE_NAME("sifive_u")
@@ -73,22 +74,22 @@ typedef struct SiFiveUState {
 } SiFiveUState;
 
 enum {
-    SIFIVE_U_DEBUG,
-    SIFIVE_U_MROM,
-    SIFIVE_U_TEST,
-    SIFIVE_U_CLINT,
-    SIFIVE_U_L2LIM,
-    SIFIVE_U_PLIC,
-    SIFIVE_U_PRCI,
-    SIFIVE_U_UART0,
-    SIFIVE_U_UART1,
-    SIFIVE_U_GPIO,
-    SIFIVE_U_OTP,
-    SIFIVE_U_DMC,
-    SIFIVE_U_FLASH0,
-    SIFIVE_U_DRAM,
-    SIFIVE_U_GEM,
-    SIFIVE_U_GEM_MGMT
+    SIFIVE_U_DEV_DEBUG,
+    SIFIVE_U_DEV_MROM,
+    SIFIVE_U_DEV_TEST,
+    SIFIVE_U_DEV_CLINT,
+    SIFIVE_U_DEV_L2LIM,
+    SIFIVE_U_DEV_PLIC,
+    SIFIVE_U_DEV_PRCI,
+    SIFIVE_U_DEV_UART0,
+    SIFIVE_U_DEV_UART1,
+    SIFIVE_U_DEV_GPIO,
+    SIFIVE_U_DEV_OTP,
+    SIFIVE_U_DEV_DMC,
+    SIFIVE_U_DEV_FLASH0,
+    SIFIVE_U_DEV_DRAM,
+    SIFIVE_U_DEV_GEM,
+    SIFIVE_U_DEV_GEM_MGMT
 };
 
 enum {
