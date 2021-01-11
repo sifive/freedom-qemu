@@ -293,6 +293,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 		--disable-cap-ng \
 		--disable-vhost-kernel \
 		--disable-vhost-user \
+		--disable-vhost-user-blk-server \
 		--disable-vhost-vdpa \
 		--disable-spice \
 		--disable-rbd \
