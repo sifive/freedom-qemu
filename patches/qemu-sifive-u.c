@@ -1002,8 +1002,8 @@ static void sifive_viu_machine_class_init(ObjectClass *oc, void *data)
     mc->default_cpus = mc->min_cpus;
 
     object_class_property_add_bool(oc, "start-in-flash",
-                                   sifive_u_machine_get_start_in_flash,
-                                   sifive_u_machine_set_start_in_flash);
+                                   sifive_viu_machine_get_start_in_flash,
+                                   sifive_viu_machine_set_start_in_flash);
     object_class_property_set_description(oc, "start-in-flash",
                                           "Set on to tell QEMU's ROM to jump to "
                                           "flash. Otherwise QEMU will jump to DRAM "
