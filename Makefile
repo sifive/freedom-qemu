@@ -128,6 +128,8 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	cp -a $(PATCHESDIR)/qemu-sifive-u.h $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_u.h
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/util/meson.build
 	cp -a $(PATCHESDIR)/qemu-util-meson.build $(dir $@)/$(SRCNAME_QEMU)/util/meson.build
+	rm -rf $(dir $@)/$(SRCNAME_QEMU)/net/can/meson.build
+	cp -a $(PATCHESDIR)/qemu-net-can-meson.build $(dir $@)/$(SRCNAME_QEMU)/net/can/meson.build
 	$(SED) -i -f $(PATCHESDIR)/qemu-configure.sed $(dir $@)/$(SRCNAME_QEMU)/configure
 	$(SED) -i -f $(PATCHESDIR)/qemu-common.sed $(dir $@)/$(SRCNAME_QEMU)/include/qemu-common.h
 	$(SED) -i -f $(PATCHESDIR)/qemu-vl.sed $(dir $@)/$(SRCNAME_QEMU)/softmmu/vl.c
