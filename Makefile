@@ -18,6 +18,7 @@ $(WIN64)-rqemu-host          := --host=$(WIN64)
 $(WIN64)-rqemu-cross         := --cross-prefix=x86_64-w64-mingw32-
 $(WIN64)-rqemu-bindir        := /bin
 $(WIN64)-gettext-configure   := --enable-threads=windows
+$(WIN64)-glib-configure      := --enable-static --disable-shared
 $(WIN64)-glib-vars           := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
 $(WIN64)-pixman-vars         := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
 $(UBUNTU64)-rqemu-vars       := PKG_CONFIG_LIBDIR="$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib/pkgconfig" CFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include -Wno-unused-result" CPPFLAGS="-fPIC -I$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/include" QEMU_LDFLAGS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64" LIBS="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -liconv" SIFIVE_LIBS_QGA="-L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib -L$(abspath $(OBJ_UBUNTU64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64))/lib64 -liconv"
@@ -182,34 +183,83 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libiconv/build.stamp: \
 	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/libiconv-make-install.log
 	date > $@
 
-$(OBJDIR)/%/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
-		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/libiconv/build.stamp \
-		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
-	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/gettext/build.stamp,%,$@))
-	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
+		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/libiconv/build.stamp \
+		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/source.stamp
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/build/$(PACKAGE_HEADING),$@))
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-	cd $(dir $@) && $($($@_TARGET)-deps-vars) ./configure \
-		$($($@_TARGET)-rqemu-host) \
+	cd $(dir $@) && $($(NATIVE)-deps-vars) ./configure \
+		$($(NATIVE)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
 		--enable-static \
-		$($($@_TARGET)-gettext-configure) &>$($@_REC)/gettext-make-configure.log
+		$($(NATIVE)-gettext-configure) &>$($@_REC)/gettext-make-configure.log
 	$(MAKE) -C $(dir $@) &>$($@_REC)/gettext-make-build.log
 	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/gettext-make-install.log
 	date > $@
 
-$(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp: \
-		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/gettext/build.stamp \
-		$(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp
-	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/glib/build.stamp,%,$@))
-	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
+$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
+		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/libiconv/build.stamp \
+		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/source.stamp
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64),$@))
+	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(SED) -i -f $(PATCHESDIR)/gettext-gnu-source.sed $(dir $@)/gettext-runtime/libasprintf/autosprintf.cc
+	$(SED) -i -f $(PATCHESDIR)/gettext-gnu-source.sed $(dir $@)/gettext-runtime/libasprintf/vasnprintf.c
+	cd $(dir $@) && $($(WIN64)-deps-vars) ./configure \
+		$($(WIN64)-rqemu-host) \
+		--prefix=$(abspath $($@_INSTALL)) \
+		--enable-static \
+		$($(WIN64)-gettext-configure) &>$($@_REC)/gettext-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/gettext-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/gettext-make-install.log
+	date > $@
+
+$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/glib/build.stamp: \
+		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/gettext/build.stamp \
+		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/source.stamp
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/build/$(PACKAGE_HEADING),$@))
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)/gio/lib
-	cd $(dir $@) && $($($@_TARGET)-glib-vars) ./configure \
-		$($($@_TARGET)-rqemu-host) \
+	cd $(dir $@) && $($(NATIVE)-glib-vars) ./configure \
+		$($(NATIVE)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		$($($@_TARGET)-glib-configure) \
+		$($(NATIVE)-glib-configure) \
+		--with-libiconv=gnu \
+		--without-pcre \
+		--disable-selinux \
+		--disable-fam \
+		--disable-xattr \
+		--disable-libelf \
+		--disable-libmount \
+		--disable-dtrace \
+		--disable-systemtap \
+		--disable-coverage \
+		--disable-Bsymbolic \
+		--disable-znodelete \
+		--disable-compile-warnings \
+		--disable-installed-tests \
+		--disable-always-build-tests &>$($@_REC)/glib-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_REC)/glib-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/glib-make-install.log
+	rm -rf $(abspath $($@_INSTALL))/share/gdb
+	date > $@
+
+$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/glib/build.stamp: \
+		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/gettext/build.stamp \
+		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/source.stamp
+	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64),$@))
+	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/build/$(PACKAGE_HEADING),$@))
+	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	mkdir -p $(dir $@)/gio/lib
+	$(SED) -i -f $(PATCHESDIR)/glib-var-extern.sed $(dir $@)/glib/gtypes.h
+	$(SED) -i -f $(PATCHESDIR)/glib-dllmain-off.sed $(dir $@)/glib/glib-init.c
+	$(SED) -i -f $(PATCHESDIR)/glib-dllmain-off.sed $(dir $@)/gobject/gtype.c
+	cd $(dir $@) && $($(WIN64)-glib-vars) ./configure \
+		$($(WIN64)-rqemu-host) \
+		--prefix=$(abspath $($@_INSTALL)) \
+		$($(WIN64)-glib-configure) \
 		--with-libiconv=gnu \
 		--without-pcre \
 		--disable-selinux \
