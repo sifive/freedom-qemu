@@ -254,6 +254,7 @@ $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)/gio/lib
 	$(SED) -i -f $(PATCHESDIR)/glib-var-extern.sed $(dir $@)/glib/gtypes.h
+	# https://github.com/msys2/MINGW-packages/blob/master/mingw-w64-glib2/0001-win32-Make-the-static-build-work-with-MinGW-when-pos.patch
 	$(SED) -i -f $(PATCHESDIR)/glib-dllmain-off.sed $(dir $@)/glib/glib-init.c
 	$(SED) -i -f $(PATCHESDIR)/glib-dllmain-off.sed $(dir $@)/gobject/gtype.c
 	cd $(dir $@) && $($(WIN64)-glib-vars) ./configure \
