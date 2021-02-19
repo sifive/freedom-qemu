@@ -9,7 +9,7 @@ PACKAGE_VERSION := $(RISCV_QEMU_VERSION)-$(FREEDOM_QEMU_ID)$(EXTRA_SUFFIX)
 
 # Source code directory references
 SRCNAME_QEMU := riscv-qemu
-SRCPATH_QEMU := $(SRCDIR)/$(SRCNAME_QEMU)
+SRCPATH_QEMU := src/$(SRCNAME_QEMU)
 
 # Some special package configure flags for specific targets
 $(WIN64)-rqemu-vars          := PKG_CONFIG_PATH="$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib/pkgconfig" CFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include" CPPFLAGS="-L$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/lib -I$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/include"
@@ -53,16 +53,22 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/install.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/install.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	mkdir -p $(dir $@)
-	mkdir -p $(dir $@)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle/features
 	git log --format="[%ad] %s" > $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).changelog
 	cp README.md $(abspath $($@_INSTALL))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).readme.md
-	tclsh scripts/generate-feature-xml.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_QEMU_VERSION)" "$(FREEDOM_QEMU_ID)" $($@_TARGET) $(abspath $($@_INSTALL))
-	tclsh scripts/generate-chmod755-sh.tcl $(abspath $($@_INSTALL))
-	tclsh scripts/generate-site-xml.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_QEMU_VERSION)" "$(FREEDOM_QEMU_ID)" $($@_TARGET) $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle
-	tclsh scripts/generate-bundle-mk.tcl $(abspath $($@_INSTALL)) RISCV_TAGS "$(FREEDOM_QEMU_RISCV_TAGS)" TOOLS_TAGS "$(FREEDOM_QEMU_TOOLS_TAGS)"
-	cp $(abspath $($@_INSTALL))/bundle.mk $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle
-	cd $($@_INSTALL); zip -rq $(abspath $(dir $@))/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET).bundle/features/$(PACKAGE_HEADING)_$(FREEDOM_QEMU_ID)_$(RISCV_QEMU_VERSION).jar *
-	tclsh scripts/check-maximum-path-length.tcl $(abspath $($@_INSTALL)) "$(PACKAGE_HEADING)" "$(RISCV_QEMU_VERSION)" "$(FREEDOM_QEMU_ID)"
+	rm -f $(abspath $($@_PROPERTIES))
+	echo "# SiFive Freedom Package Properties File" > $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_TYPE = freedom-tools" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_DESC_SEG = $(PACKAGE_WORDING)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_FIXED_ID = $(PACKAGE_HEADING)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_BUILD_ID = $(FREEDOM_QEMU_ID)$(EXTRA_SUFFIX)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_CORE_VER = $(RISCV_QEMU_VERSION)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_TARGET = $($@_TARGET)" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_VENDOR = SiFive" >> $(abspath $($@_PROPERTIES))
+	echo "PACKAGE_RIGHTS = sifive-v00 eclipse-v20" >> $(abspath $($@_PROPERTIES))
+	echo "RISCV_TAGS = $(FREEDOM_QEMU_RISCV_TAGS)" >> $(abspath $($@_PROPERTIES))
+	echo "TOOLS_TAGS = $(FREEDOM_QEMU_TOOLS_TAGS)" >> $(abspath $($@_PROPERTIES))
+	cp $(abspath $($@_PROPERTIES)) $(abspath $($@_INSTALL))/
+	tclsh scripts/check-maximum-path-length.tcl $(abspath $($@_INSTALL)) "$(PACKAGE_HEADING)" "$(RISCV_QEMU_VERSION)" "$(FREEDOM_QEMU_ID)$(EXTRA_SUFFIX)"
 	tclsh scripts/check-same-name-different-case.tcl $(abspath $($@_INSTALL))
 	date > $@
 
@@ -82,75 +88,75 @@ $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/libs.stamp: \
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp:
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/source.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-	tclsh scripts/check-naming-and-version-syntax.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_QEMU_VERSION)" "$(FREEDOM_QEMU_ID)"
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/source.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
+	tclsh scripts/check-naming-and-version-syntax.tcl "$(PACKAGE_WORDING)" "$(PACKAGE_HEADING)" "$(RISCV_QEMU_VERSION)" "$(FREEDOM_QEMU_ID)$(EXTRA_SUFFIX)"
 	rm -rf $($@_INSTALL)
 	mkdir -p $($@_INSTALL)
-	rm -rf $($@_REC)
-	mkdir -p $($@_REC)
+	rm -rf $($@_BUILDLOG)
+	mkdir -p $($@_BUILDLOG)
 	rm -rf $(dir $@)
 	mkdir -p $(dir $@)
-	git log > $($@_REC)/$(PACKAGE_HEADING)-git-commit.log
-	cp .gitmodules $($@_REC)/$(PACKAGE_HEADING)-git-modules.log
-	git remote -v > $($@_REC)/$(PACKAGE_HEADING)-git-remote.log
-	git submodule status > $($@_REC)/$(PACKAGE_HEADING)-git-submodule.log
-	cd $($@_REC); curl -L -f -s -o zlib-1.2.11.tar.gz http://zlib.net/fossils/zlib-1.2.11.tar.gz
-	cd $(dir $@); $(TAR) -xf $($@_REC)/zlib-1.2.11.tar.gz
+	git log > $($@_BUILDLOG)/$(PACKAGE_HEADING)-git-commit.log
+	cp .gitmodules $($@_BUILDLOG)/$(PACKAGE_HEADING)-git-modules.log
+	git remote -v > $($@_BUILDLOG)/$(PACKAGE_HEADING)-git-remote.log
+	git submodule status > $($@_BUILDLOG)/$(PACKAGE_HEADING)-git-submodule.log
+	cd $(dir $@); curl -L -f -s -o zlib-1.2.11.tar.gz http://zlib.net/fossils/zlib-1.2.11.tar.gz
+	cd $(dir $@); $(TAR) -xf zlib-1.2.11.tar.gz
 	cd $(dir $@); mv zlib-1.2.11 zlib
-	cd $($@_REC); curl -L -f -s -o libffi-3.2.1.tar.gz http://mirrors.kernel.org/sourceware/libffi/libffi-3.2.1.tar.gz
-	cd $(dir $@); $(TAR) -xf $($@_REC)/libffi-3.2.1.tar.gz
+	cd $(dir $@); curl -L -f -s -o libffi-3.2.1.tar.gz http://mirrors.kernel.org/sourceware/libffi/libffi-3.2.1.tar.gz
+	cd $(dir $@); $(TAR) -xf libffi-3.2.1.tar.gz
 	cd $(dir $@); mv libffi-3.2.1 libffi
-	cd $($@_REC); curl -L -f -s -o libiconv-1.15.tar.gz https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.15.tar.gz
-	cd $(dir $@); $(TAR) -xf $($@_REC)/libiconv-1.15.tar.gz
+	cd $(dir $@); curl -L -f -s -o libiconv-1.15.tar.gz https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.15.tar.gz
+	cd $(dir $@); $(TAR) -xf libiconv-1.15.tar.gz
 	cd $(dir $@); mv libiconv-1.15 libiconv
-	cd $($@_REC); curl -L -f -s -o gettext-0.19.8.1.tar.gz https://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.1.tar.gz
-	cd $(dir $@); $(TAR) -xf $($@_REC)/gettext-0.19.8.1.tar.gz
+	cd $(dir $@); curl -L -f -s -o gettext-0.19.8.1.tar.gz https://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.1.tar.gz
+	cd $(dir $@); $(TAR) -xf gettext-0.19.8.1.tar.gz
 	cd $(dir $@); mv gettext-0.19.8.1 gettext
-	cd $($@_REC); curl -L -f -s -o glib-2.56.4.tar.xz http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.56/glib-2.56.4.tar.xz
-	cd $(dir $@); $(TAR) -xf $($@_REC)/glib-2.56.4.tar.xz
+	cd $(dir $@); curl -L -f -s -o glib-2.56.4.tar.xz http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.56/glib-2.56.4.tar.xz
+	cd $(dir $@); $(TAR) -xf glib-2.56.4.tar.xz
 	cd $(dir $@); mv glib-2.56.4 glib
-	cd $($@_REC); curl -L -f -s -o pixman-0.38.0.tar.gz https://cairographics.org/releases/pixman-0.38.0.tar.gz
-	cd $(dir $@); $(TAR) -xf $($@_REC)/pixman-0.38.0.tar.gz
+	cd $(dir $@); curl -L -f -s -o pixman-0.38.0.tar.gz https://cairographics.org/releases/pixman-0.38.0.tar.gz
+	cd $(dir $@); $(TAR) -xf pixman-0.38.0.tar.gz
 	cd $(dir $@); mv pixman-0.38.0 pixman
 	cp -a $(SRCPATH_QEMU) $(dir $@)
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
-	cp -a $(PATCHESDIR)/qemu-riscv-cpu.c $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
+	cp -a patches/qemu-riscv-cpu.c $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.h
-	cp -a $(PATCHESDIR)/qemu-riscv-cpu.h $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.h
+	cp -a patches/qemu-riscv-cpu.h $(dir $@)/$(SRCNAME_QEMU)/target/riscv/cpu.h
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
-	cp -a $(PATCHESDIR)/qemu-sifive-e.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
+	cp -a patches/qemu-sifive-e.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_e.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_test.c
-	cp -a $(PATCHESDIR)/qemu-sifive-test.c $(dir $@)/$(SRCNAME_QEMU)/hw/misc/sifive_test.c
+	cp -a patches/qemu-sifive-test.c $(dir $@)/$(SRCNAME_QEMU)/hw/misc/sifive_test.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_u.c
-	cp -a $(PATCHESDIR)/qemu-sifive-u.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_u.c
+	cp -a patches/qemu-sifive-u.c $(dir $@)/$(SRCNAME_QEMU)/hw/riscv/sifive_u.c
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_e.h
-	cp -a $(PATCHESDIR)/qemu-sifive-e.h $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_e.h
+	cp -a patches/qemu-sifive-e.h $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_e.h
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_u.h
-	cp -a $(PATCHESDIR)/qemu-sifive-u.h $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_u.h
+	cp -a patches/qemu-sifive-u.h $(dir $@)/$(SRCNAME_QEMU)/include/hw/riscv/sifive_u.h
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/util/meson.build
-	cp -a $(PATCHESDIR)/qemu-util-meson.build $(dir $@)/$(SRCNAME_QEMU)/util/meson.build
+	cp -a patches/qemu-util-meson.build $(dir $@)/$(SRCNAME_QEMU)/util/meson.build
 	rm -rf $(dir $@)/$(SRCNAME_QEMU)/net/can/meson.build
-	cp -a $(PATCHESDIR)/qemu-net-can-meson.build $(dir $@)/$(SRCNAME_QEMU)/net/can/meson.build
-	$(SED) -i -f $(PATCHESDIR)/qemu-configure.sed $(dir $@)/$(SRCNAME_QEMU)/configure
-	$(SED) -i -f $(PATCHESDIR)/qemu-common.sed $(dir $@)/$(SRCNAME_QEMU)/include/qemu-common.h
-	$(SED) -i -f $(PATCHESDIR)/qemu-vl.sed $(dir $@)/$(SRCNAME_QEMU)/softmmu/vl.c
+	cp -a patches/qemu-net-can-meson.build $(dir $@)/$(SRCNAME_QEMU)/net/can/meson.build
+	$(SED) -i -f patches/qemu-configure.sed $(dir $@)/$(SRCNAME_QEMU)/configure
+	$(SED) -i -f patches/qemu-common.sed $(dir $@)/$(SRCNAME_QEMU)/include/qemu-common.h
+	$(SED) -i -f patches/qemu-vl.sed $(dir $@)/$(SRCNAME_QEMU)/softmmu/vl.c
 	date > $@
 
 $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/zlib/build.stamp: \
 		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/source.stamp
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/zlib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/zlib/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($(NATIVE)-deps-vars) ./configure \
 		--prefix=$(abspath $(OBJ_NATIVE)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)) \
-		$($(NATIVE)-zlib-configure) &>$($@_REC)/zlib-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/zlib-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/zlib-make-install.log
+		$($(NATIVE)-zlib-configure) &>$($@_BUILDLOG)/zlib-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/zlib-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/zlib-make-install.log
 	date > $@
 
 $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/zlib/build.stamp: \
 		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/source.stamp
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/zlib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-	$(MAKE) -C $(dir $@) -f win32/Makefile.gcc PREFIX=$(WIN64)- prefix=$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/ &>$($@_REC)/zlib-make-build.log
-	$(MAKE) -j1 -C $(dir $@) -f win32/Makefile.gcc SHARED_MODE=1 install DESTDIR=$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/ INCLUDE_PATH=include LIBRARY_PATH=lib BINARY_PATH=bin &>$($@_REC)/zlib-make-install.log
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/zlib/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
+	$(MAKE) -C $(dir $@) -f win32/Makefile.gcc PREFIX=$(WIN64)- prefix=$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/ &>$($@_BUILDLOG)/zlib-make-build.log
+	$(MAKE) -j1 -C $(dir $@) -f win32/Makefile.gcc SHARED_MODE=1 install DESTDIR=$(abspath $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64))/ INCLUDE_PATH=include LIBRARY_PATH=lib BINARY_PATH=bin &>$($@_BUILDLOG)/zlib-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp: \
@@ -159,13 +165,13 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libffi/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/libffi/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/libffi/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/libffi/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/libffi/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($($@_TARGET)-deps-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--enable-static &>$($@_REC)/libffi-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/libffi-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/libffi-make-install.log
+		--enable-static &>$($@_BUILDLOG)/libffi-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/libffi-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/libffi-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libiconv/build.stamp: \
@@ -174,13 +180,13 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libiconv/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/libiconv/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($($@_TARGET)-deps-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
-		--enable-static &>$($@_REC)/libiconv-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/libiconv-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/libiconv-make-install.log
+		--enable-static &>$($@_BUILDLOG)/libiconv-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/libiconv-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/libiconv-make-install.log
 	date > $@
 
 $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
@@ -188,14 +194,14 @@ $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
 		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/source.stamp
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	cd $(dir $@) && $($(NATIVE)-deps-vars) ./configure \
 		$($(NATIVE)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
 		--enable-static \
-		$($(NATIVE)-gettext-configure) &>$($@_REC)/gettext-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/gettext-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/gettext-make-install.log
+		$($(NATIVE)-gettext-configure) &>$($@_BUILDLOG)/gettext-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/gettext-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/gettext-make-install.log
 	date > $@
 
 $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
@@ -203,16 +209,17 @@ $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/gettext/build.stamp: \
 		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/source.stamp
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
-	$(SED) -i -f $(PATCHESDIR)/gettext-gnu-source.sed $(dir $@)/gettext-runtime/libasprintf/autosprintf.cc
-	$(SED) -i -f $(PATCHESDIR)/gettext-gnu-source.sed $(dir $@)/gettext-runtime/libasprintf/vasnprintf.c
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/gettext/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
+	# https://spacegit.unibe.ch/open-source/crosstool-ng/blob/a1b4ec3b176683817ba128ebb87117725cfa5d20/patches/gettext/0.19.6/110-Fix-linker-error-redefinition-of-vasprintf.patch
+	$(SED) -i -f patches/gettext-gnu-source.sed $(dir $@)/gettext-runtime/libasprintf/autosprintf.cc
+	$(SED) -i -f patches/gettext-gnu-source.sed $(dir $@)/gettext-runtime/libasprintf/vasnprintf.c
 	cd $(dir $@) && $($(WIN64)-deps-vars) ./configure \
 		$($(WIN64)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
 		--enable-static \
-		$($(WIN64)-gettext-configure) &>$($@_REC)/gettext-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/gettext-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/gettext-make-install.log
+		$($(WIN64)-gettext-configure) &>$($@_BUILDLOG)/gettext-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/gettext-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/gettext-make-install.log
 	date > $@
 
 $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/glib/build.stamp: \
@@ -220,7 +227,7 @@ $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 		$(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/source.stamp
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)/gio/lib
 	cd $(dir $@) && $($(NATIVE)-glib-vars) ./configure \
 		$($(NATIVE)-rqemu-host) \
@@ -240,9 +247,9 @@ $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 		--disable-znodelete \
 		--disable-compile-warnings \
 		--disable-installed-tests \
-		--disable-always-build-tests &>$($@_REC)/glib-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/glib-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/glib-make-install.log
+		--disable-always-build-tests &>$($@_BUILDLOG)/glib-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/glib-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/glib-make-install.log
 	rm -rf $(abspath $($@_INSTALL))/share/gdb
 	date > $@
 
@@ -251,12 +258,12 @@ $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 		$(OBJ_WIN64)/build/$(PACKAGE_HEADING)/source.stamp
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/glib/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)/gio/lib
-	$(SED) -i -f $(PATCHESDIR)/glib-var-extern.sed $(dir $@)/glib/gtypes.h
+	$(SED) -i -f patches/glib-var-extern.sed $(dir $@)/glib/gtypes.h
 	# https://github.com/msys2/MINGW-packages/blob/master/mingw-w64-glib2/0001-win32-Make-the-static-build-work-with-MinGW-when-pos.patch
-	$(SED) -i -f $(PATCHESDIR)/glib-dllmain-off.sed $(dir $@)/glib/glib-init.c
-	$(SED) -i -f $(PATCHESDIR)/glib-dllmain-off.sed $(dir $@)/gobject/gtype.c
+	$(SED) -i -f patches/glib-dllmain-off.sed $(dir $@)/glib/glib-init.c
+	$(SED) -i -f patches/glib-dllmain-off.sed $(dir $@)/gobject/gtype.c
 	cd $(dir $@) && $($(WIN64)-glib-vars) ./configure \
 		$($(WIN64)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
@@ -275,9 +282,9 @@ $(OBJ_WIN64)/build/$(PACKAGE_HEADING)/glib/build.stamp: \
 		--disable-znodelete \
 		--disable-compile-warnings \
 		--disable-installed-tests \
-		--disable-always-build-tests &>$($@_REC)/glib-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/glib-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/glib-make-install.log
+		--disable-always-build-tests &>$($@_BUILDLOG)/glib-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/glib-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/glib-make-install.log
 	rm -rf $(abspath $($@_INSTALL))/share/gdb
 	date > $@
 
@@ -287,16 +294,16 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/pixman/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/pixman/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	mkdir -p $(dir $@)/test/lib
 	cd $(dir $@) && $($($@_TARGET)-pixman-vars) ./configure \
 		$($($@_TARGET)-rqemu-host) \
 		--prefix=$(abspath $($@_INSTALL)) \
 		--enable-static \
 		--with-gnu-ld \
-		--disable-static-testprogs &>$($@_REC)/pixman-make-configure.log
-	$(MAKE) -C $(dir $@) &>$($@_REC)/pixman-make-build.log
-	$(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/pixman-make-install.log
+		--disable-static-testprogs &>$($@_BUILDLOG)/pixman-make-configure.log
+	$(MAKE) -C $(dir $@) &>$($@_BUILDLOG)/pixman-make-build.log
+	$(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/pixman-make-install.log
 	date > $@
 
 $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
@@ -306,7 +313,7 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 	$(eval $@_TARGET := $(patsubst $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%,$@))
 	$(eval $@_INSTALL := $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$($@_TARGET),$@))
 	$(eval $@_BUILD := $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%/build/$(PACKAGE_HEADING),$@))
-	$(eval $@_REC := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%/rec/$(PACKAGE_HEADING),$@)))
+	$(eval $@_BUILDLOG := $(abspath $(patsubst %/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp,%/buildlog/$(PACKAGE_HEADING),$@)))
 	rm -f $(abspath $($@_INSTALL))/lib/lib*.dylib*
 	rm -f $(abspath $($@_INSTALL))/lib/lib*.so*
 	rm -f $(abspath $($@_INSTALL))/lib64/lib*.so*
@@ -393,8 +400,8 @@ $(OBJDIR)/%/build/$(PACKAGE_HEADING)/$(SRCNAME_QEMU)/build.stamp: \
 		--enable-sheepdog \
 		--enable-rng-none \
 		--enable-fdt=git \
-		&>$($@_REC)/$(SRCNAME_QEMU)-make-configure.log
-	$($($@_TARGET)-rqemu-vars-ext) $(MAKE) -C $(dir $@) -j1 install &>$($@_REC)/$(SRCNAME_QEMU)-make-install.log
+		&>$($@_BUILDLOG)/$(SRCNAME_QEMU)-make-configure.log
+	$($($@_TARGET)-rqemu-vars-ext) $(MAKE) -C $(dir $@) -j1 install &>$($@_BUILDLOG)/$(SRCNAME_QEMU)-make-install.log
 	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/qemu-edid
 	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/qemu-ga
 	tclsh scripts/dyn-lib-check-$($@_TARGET).tcl $(abspath $($@_INSTALL))/bin/qemu-img

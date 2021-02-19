@@ -6,63 +6,90 @@ export PATH
 # The actual output of this repository is a set of tarballs.
 .PHONY: win64-package
 win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).zip
-win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.zip
+win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).tar.gz
+win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.tar.gz
+win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).log.tar.gz
+win64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).properties
 .PHONY: ubuntu64-package
 ubuntu64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64).tar.gz
 ubuntu64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64).src.tar.gz
+ubuntu64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64).log.tar.gz
+ubuntu64-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(UBUNTU64).properties
 .PHONY: redhat-package
 redhat-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT).tar.gz
 redhat-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT).src.tar.gz
+redhat-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT).log.tar.gz
+redhat-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(REDHAT).properties
 .PHONY: darwin-package
 darwin-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN).tar.gz
 darwin-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN).src.tar.gz
+darwin-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN).log.tar.gz
+darwin-package: $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(DARWIN).properties
 
 # There's enough % rules that make starts blowing intermediate files away.
 .SECONDARY:
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).zip: \
 		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp \
-		$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).tar.gz
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
 	mkdir -p $(dir $@)
 	cd $(OBJDIR)/$(WIN64)/install; zip -rq $(abspath $@) $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 
-$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.zip: \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
-		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp \
-		$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.tar.gz
-	mkdir -p $(dir $@)
-	cd $(abspath $(PREFIXPATH).); zip -x "/bin/*" "/obj/*" -rq $(abspath $@) *
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
+#$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.zip: \
+#		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
+#		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
+#	mkdir -p $(dir $@)
+#	cd $(abspath .); zip -x "/bin/*" "/obj/*" -rq $(abspath $@) *
+
+#$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).log.zip: \
+#		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
+#		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
+#	mkdir -p $(dir $@)
+#	cd $(OBJDIR)/$(WIN64)/buildlog/$(PACKAGE_HEADING); zip -rq $(abspath $@) *
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).tar.gz: \
 		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
 		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
 	mkdir -p $(dir $@)
-	$(TAR) --dereference --hard-dereference -C $(OBJDIR)/$(WIN64)/install -c $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64) | gzip > $(abspath $@)
-	cp -a $(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).bundle $(dir $@)
+	cd $(OBJDIR)/$(WIN64)/install; $(TAR) --dereference --hard-dereference -c $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64) | gzip > $(abspath $@)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.tar.gz: \
 		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
 		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
 	mkdir -p $(dir $@)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
-	cp -a $(OBJ_WIN64)/rec/$(PACKAGE_HEADING) $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
-	$(TAR) --dereference --hard-dereference -C $(abspath $(PREFIXPATH).) --exclude bin --exclude obj -c * | gzip > $(abspath $@)
+	cd $(abspath .); $(TAR) --dereference --hard-dereference --exclude bin --exclude obj -c * | gzip > $(abspath $@)
+
+$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).log.tar.gz: \
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
+	mkdir -p $(dir $@)
+	cd $(OBJDIR)/$(WIN64)/buildlog/$(PACKAGE_HEADING); $(TAR) --dereference --hard-dereference -c * | gzip > $(abspath $@)
+
+$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).properties: \
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/install.stamp \
+		$(OBJDIR)/$(WIN64)/build/$(PACKAGE_HEADING)/libs.stamp
+	mkdir -p $(dir $@)
+	cp $(OBJDIR)/$(WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).properties $(abspath $@)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).tar.gz: \
 		$(OBJDIR)/$(NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
 	mkdir -p $(dir $@)
-	$(TAR) --dereference --hard-dereference -C $(OBJDIR)/$(NATIVE)/install -c $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE) | gzip > $(abspath $@)
-	cp -a $(OBJDIR)/$(NATIVE)/build/$(PACKAGE_HEADING)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).bundle $(dir $@)
+	cd $(OBJDIR)/$(NATIVE)/install; $(TAR) --dereference --hard-dereference -c $(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE) | gzip > $(abspath $@)
 
 $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).src.tar.gz: \
 		$(OBJDIR)/$(NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
 	mkdir -p $(dir $@)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
-	cp -a $(OBJ_NATIVE)/rec/$(PACKAGE_HEADING) $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
-	$(TAR) --dereference --hard-dereference -C $(abspath $(PREFIXPATH).) --exclude bin --exclude obj -c * | gzip > $(abspath $@)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
+	cd $(abspath .); $(TAR) --dereference --hard-dereference --exclude bin --exclude obj -c * | gzip > $(abspath $@)
+
+$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).log.tar.gz: \
+		$(OBJDIR)/$(NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
+	mkdir -p $(dir $@)
+	cd $(OBJDIR)/$(NATIVE)/buildlog/$(PACKAGE_HEADING); $(TAR) --dereference --hard-dereference -c * | gzip > $(abspath $@)
+
+$(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).properties: \
+		$(OBJDIR)/$(NATIVE)/build/$(PACKAGE_HEADING)/install.stamp
+	mkdir -p $(dir $@)
+	cp $(OBJDIR)/$(NATIVE)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).properties $(abspath $@)
 
 # Installs native package.
 PACKAGE_TARBALL = $(wildcard $(BINDIR)/$(PACKAGE_HEADING)-*-$(NATIVE).tar.gz)
@@ -86,38 +113,41 @@ native-regress: $(OBJDIR)/$(NATIVE)/test/$(PACKAGE_HEADING)/test.stamp
 
 .PHONY: cleanup
 cleanup:
-	rm -rf $(OBJ_NATIVE)/rec/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_NATIVE)/test/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_NATIVE)/launch/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
 	rm -rf $(OBJ_NATIVE)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
+	rm -rf $(OBJ_NATIVE)/testlog/$(PACKAGE_HEADING)
+	rm -rf $(OBJ_NATIVE)/buildlog/$(PACKAGE_HEADING)
 	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).tar.gz
 	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).src.tar.gz
-	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).bundle
-	rm -rf $(OBJ_WIN64)/rec/$(PACKAGE_HEADING)
+	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).log.tar.gz
+	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE).properties
 	rm -rf $(OBJ_WIN64)/test/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_WIN64)/build/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_WIN64)/launch/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 	rm -rf $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
+	rm -rf $(OBJ_WIN64)/testlog/$(PACKAGE_HEADING)
+	rm -rf $(OBJ_WIN64)/buildlog/$(PACKAGE_HEADING)
 	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).zip
-	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.zip
+#	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.zip
+#	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).log.zip
 	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).tar.gz
 	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).src.tar.gz
-	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).bundle
+	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).log.tar.gz
+	rm -rf $(BINDIR)/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64).properties
 
 .PHONY: flushup
 flushup:
-	rm -rf $(OBJ_NATIVE)/rec/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_NATIVE)/test/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_NATIVE)/build/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_NATIVE)/launch/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
 	rm -rf $(OBJ_NATIVE)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(NATIVE)
-	rm -rf $(OBJ_WIN64)/rec/$(PACKAGE_HEADING)
+	rm -rf $(OBJ_NATIVE)/testlog/$(PACKAGE_HEADING)
+	rm -rf $(OBJ_NATIVE)/buildlog/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_WIN64)/test/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_WIN64)/build/$(PACKAGE_HEADING)
 	rm -rf $(OBJ_WIN64)/launch/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
 	rm -rf $(OBJ_WIN64)/install/$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
-	rm -rf $(RECDIR)-$(PACKAGE_HEADING)-$(PACKAGE_VERSION)-$(WIN64)
+	rm -rf $(OBJ_WIN64)/testlog/$(PACKAGE_HEADING)
+	rm -rf $(OBJ_WIN64)/buildlog/$(PACKAGE_HEADING)
